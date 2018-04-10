@@ -29,17 +29,44 @@ echo -e "
 echo -e "\033[1m\033[33m 1 => Basic(Empty \n 2 => Standard \n 3 => Advance"
 read option
 
+echo "============================Django===================================="
 if [ $option="1" ]
 then
-    echo -e "\033[4m\033[1m\033[32m Installation Django in your Env.."
-    pip install django
+echo -e "\033[4m\033[1m\033[32m Installation Django in your Env.."
+pip install django
 
-    cd src
-    echo -e "\033[4m\033[1m\033[34m Create Project"
-    django-admin startproject $project_name .
-    python manage.py makemigration 
-    python manage.py migrate
-    python manage.py runserver
+cd src
+echo -e "\033[4m\033[1m\033[34m Create Project"
+django-admin startproject $project_name .
+
+cd $project_name
+mkdir settings
+echo "=====Create Base Setting for This Projects======"
+cp settings.py settings/base.py 
+echo "Change setting for run this project BASE DIR"
+sed -i 's/(os.path.abspath(__file__)))/(os.path.dirname(os.path.abspath(__file__))))/g' settings/base.py
+
+echo "Rename settings.py to old_setting.py"
+mv settings.py old_settings.py 
+
+echo "Create Prod and Dev"
+touch settings/__init__.py settings/prod.py settings/dev.py
+
+echo "content of __init__"
+echo "
+from .base import *
+
+try:
+    from .base import *
+except:
+    pass" > settings/__init__.py
+echo "Back To parent Dir"
+cd ..
+
+
+python manage.py makemigrations 
+python manage.py migrate
+python manage.py runserver
 
 fi
 
