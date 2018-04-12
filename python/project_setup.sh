@@ -1,5 +1,5 @@
 #!/bin/bash
-echo -e " \033[1m\033[32mEnter Project Name"
+echo -e " \033[1m\033[32mEnter Project Name Except['test','abc']"
 read project_name
 
 mkdir $project_name
@@ -41,7 +41,7 @@ django-admin startproject $project_name .
 
 cd $project_name
 mkdir settings
-echo "=====Create Base Setting for This Projects======"
+echo "==================Create Base Setting for This Projects================"
 cp settings.py settings/base.py 
 echo "Change setting for run this project BASE DIR"
 sed -i 's/(os.path.abspath(__file__)))/(os.path.dirname(os.path.abspath(__file__))))/g' settings/base.py
@@ -52,6 +52,39 @@ mv settings.py old_settings.py
 echo "Create Prod and Dev"
 touch settings/__init__.py settings/prod.py settings/dev.py
 
+echo "connection string dev.py Dev_db "
+echo "
+from .base import *
+DEBUG = True
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.Dev_db',
+        'USER': '',
+    }
+}
+
+# $ ./manage.py runserver --settings=myproject.settings.dev
+# $ ./manage.py runserver --settings=myproject.settings.prod
+" > settings/dev.py
+
+echo "connection string Prod.py PostgresDB"
+echo "
+from .base import *
+DEBUG = False
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'myproject',
+        'USER': 'myuser',
+        'PASSWORD': 'bestpasswordever',
+    }
+}
+# $ ./manage.py runserver --settings=myproject.settings.dev
+# $ ./manage.py runserver --settings=myproject.settings.prod
+
+" > settings/prod.py
+
 echo "content of __init__"
 echo "
 from .base import *
@@ -60,13 +93,14 @@ try:
     from .base import *
 except:
     pass" > settings/__init__.py
+
 echo "Back To parent Dir"
 cd ..
 
-
+echo -e "\033[4m\033[1m\033[32m Server is Started..."
 python manage.py makemigrations 
 python manage.py migrate
-python manage.py runserver
+python manage.py runserver 
 
 fi
 
